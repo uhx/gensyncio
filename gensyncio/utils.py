@@ -26,7 +26,7 @@ def gather(
     ordered_ids = [task.id for task in tasks]
     results: dict[UUID, Any] = {}
     while tasks:
-        for task in tasks:
+        for task in tasks[:]:
             if task.done():
                 results[task.id] = task.result
                 tasks.remove(task)
