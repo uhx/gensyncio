@@ -1,6 +1,5 @@
 import time
 from typing import Any, Generator, Tuple, TypeVar
-from uuid import UUID
 
 from gensyncio.loop import Loop
 from gensyncio.task import Task
@@ -23,17 +22,16 @@ def gather(
     loop = get_running_loop()
     start_time = time.time()
     tasks = [loop.create_task(future) for future in futures]
-    ordered_ids = [task.id for task in tasks]
-    results: dict[UUID, Any] = {}
+    results = [None] * len(tasks)
     while tasks:
-        for task in tasks[:]:
+        for i, task in enumerate(tasks[:]):
             if task.done():
-                results[task.id] = task.result
+                results[i] = task.result
                 tasks.remove(task)
         if timeout and time.time() - start_time > timeout:
             raise TimeoutError(f"Timeout on tasks: {ordered_ids}")
         yield
-    return tuple(results[id] for id in ordered_ids)
+    return tuple(results)
 
 
 def run(coro: Generator[Any, Any, Any] | Task[Any, Any]) -> Any:
